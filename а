@@ -1,0 +1,65 @@
+from telegram import InlineQueryResultArticle, InputTextMessageContent, Update
+from telegram.ext import Application, InlineQueryHandler, ContextTypes
+
+# Твой шаблон замены букв
+def replace_letters(text: str) -> str:
+    replacements = {
+        'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd',
+        'е': 'e', 'ё': 'e', 'ж': 'zh', 'з': 'z', 'и': 'i',
+        'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n',
+        'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't',
+        'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch',
+        'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '',
+        'э': 'e', 'ю': 'yu', 'я': 'ya'
+    }
+    
+    result = []
+    for char in text.lower():
+        result.append(replacements.get(char, char))
+    return ''.join(result)
+
+# Обработчик инлайн-запросов
+async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.inline_query.query  # Текст запроса
+
+    # Если запрос не пустой, меняем буквы
+    if query:
+        modified_text = replace_letters(query)
+        
+        # Создаем результат для инлайн-режима
+        results = [
+            InlineQueryResultArticle(
+                id='1',  # Уникальный ID результата
+                title=f"Результат: {modified_text}",
+                input_message_content=InputTextMessageContent(modified_text)
+            )
+        ]
+    else:
+        # Если запрос пустой, показываем подсказку
+        results = [
+            InlineQueryResultArticle(
+                id='1',
+                title="у меня психихиХЫФАХЫВХАХЫВХАФЫХ",
+                input_message_content=InputTextMessageContent("боже, как же ты меня заебал, иди нахуй!")
+            )
+        ]
+
+    # Отправляем результаты
+    await update.inline_query.answer(results)
+
+# Основная функция
+def main() -> None:
+    # Вставь сюда свой токен
+    token = '7787530071:AAFEbadJdRTeVs53u31HnuN8v7VinJXcQog'
+    
+    # Создаем приложение и передаем токен
+    application = Application.builder().token(token).build()
+
+    # Регистрируем обработчик инлайн-запросов
+    application.add_handler(InlineQueryHandler(inline_query))
+
+    # Запускаем бота
+    application.run_polling()
+
+if __name__ == '__main__':
+    main()
